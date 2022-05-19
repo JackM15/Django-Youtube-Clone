@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic.detail import DetailView
+from django.views import View
 from django.views.generic.list import ListView
 
-from .models import Video
+from .models import Video, Comment
+from .forms import CommentForm
 
 class Index(ListView):
     model = Video
@@ -26,9 +27,41 @@ class CreateVideoView(LoginRequiredMixin, CreateView):
         return reverse("video-detail", kwargs={"pk" : self.object.pk})
 
 
-class DetailVideo(DetailView):
-    model = Video
-    template_name = 'videos/detail_video.html'
+class DetailVideo(View):
+    def get(self, request, pk):
+        video = Video.objects.get(pk=pk)
+        form = CommentForm()
+        comments = Comment.objects.filter(video=video).order_by("-created_on")
+
+        context = {
+            "object": video,
+            "form": form,
+            "comments": comments,
+        }
+
+        return render(request, "videos/detail_video.html", context)
+
+    def post(self, request, pk):
+        video = Video.objects.get(pk=pk)
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            comment = Comment(
+                user = self.request.user,
+                comment = form.cleaned_data["comment"],
+                video = video
+            )
+            comment.save()
+
+        comments = Comment.objects.filter(video=video).order_by("-created_on")
+
+        context = {
+            "object": video,
+            "form": form,
+            "comments": comments,
+        }
+
+        return render(request, "videos/detail_video.html", context)
 
 
 class UpdateVideo(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
