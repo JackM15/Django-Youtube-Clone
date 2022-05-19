@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateVideoView, DeleteVideo, DetailVideo, UpdateVideo, VideoCategoryList
+from .views import CreateVideoView, DeleteVideo, DetailVideo, UpdateVideo, VideoCategoryList, SearchVideo
 
 urlpatterns = [
     path("create/", CreateVideoView.as_view(), name="video-create"),
@@ -7,4 +7,5 @@ urlpatterns = [
     path("<int:pk>/update/", UpdateVideo.as_view(), name="video-update"),
     path("<int:pk>/delete/", DeleteVideo.as_view(), name="video-delete"),
     path("category/<int:pk>/", VideoCategoryList.as_view(), name="category-list"),
+    path("search/", SearchVideo.as_view(), name="video-search"),
 ] 
