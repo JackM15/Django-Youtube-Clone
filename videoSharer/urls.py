@@ -9,5 +9,6 @@ urlpatterns = [
     path("", video_views.Index.as_view(), name="index"),
     path('accounts/', include('allauth.urls')),
     path("videos/", include("videos.urls")),
+    path("accounts/", include("profiles.urls")),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
