@@ -5,7 +5,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import View
 from django.views.generic.list import ListView
 
-from .models import Video, Comment
+from .models import Category, Video, Comment
 from .forms import CommentForm
 
 class Index(ListView):
@@ -32,11 +32,13 @@ class DetailVideo(View):
         video = Video.objects.get(pk=pk)
         form = CommentForm()
         comments = Comment.objects.filter(video=video).order_by("-created_on")
+        categories = Video.objects.filter(category=video.category)[:15]
 
         context = {
             "object": video,
             "form": form,
             "comments": comments,
+            "categories": categories,
         }
 
         return render(request, "videos/detail_video.html", context)
@@ -54,11 +56,13 @@ class DetailVideo(View):
             comment.save()
 
         comments = Comment.objects.filter(video=video).order_by("-created_on")
+        categories = Video.objects.filter(category=video.category)[:15]
 
         context = {
             "object": video,
             "form": form,
             "comments": comments,
+            "categories": categories,
         }
 
         return render(request, "videos/detail_video.html", context)
@@ -87,3 +91,16 @@ class DeleteVideo(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         video = self.get_object()
         return self.request.user == video.uploader
+
+
+class VideoCategoryList(View):
+    def get(self, request, pk, *args, **kwargs):
+        category = Category.objects.get(pk=pk)
+        videos = Video.objects.filter(category=pk).order_by("-date_posted")
+
+        context = {
+            "category": category,
+            "videos": videos,
+        }
+
+        return render(request, "videos/video_category.html", context)
